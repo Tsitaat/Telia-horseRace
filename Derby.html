@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<style>
+    li {
+        text-align: center;
+    }
+</style>
+
+<body>
+
+    <div class="grid grid-cols-2 font-sans h-screen" x-data="race()">
+        <!-- Races -->
+
+        <div class="border-2 border-gray-400 bg-green-400 grid grid-cols-2 static p-4">
+
+
+            <div class=" border-r-2 border-gray-400 pr-4">
+                <button type="button"
+                    class="block mx-auto bg-purple-400 hover:bg-purple-500 active:bg-purple-600  p-2 rounded-full border-2 border-blue-400"
+                    @click="create = true">
+                    Create a new race
+                </button>
+                <br>
+                <hr><br>
+
+                <div x-show="create" x-transition>
+                    <!-- When and where -->
+                    <div>
+                        <label for="raceName">Event name:</label><br>
+                        <input type="text" id="raceName" x-model="raceName"><br>
+                        <label for="where">Where:</label><br>
+                        <input type="text" id="where" x-model="location"><br>
+                        <label for="when">When:</label><br>
+                        <input type="date" id="when" x-model="raceDate">
+                        <button type="button"
+                            class="block bg-purple-400 hover:bg-purple-500 active:bg-purple-600 p-2 px-3 m-1 rounded-full border-2 border-blue-400"
+                            @click="validateRace()">
+                            Next
+                        </button>
+                        <template x-if="wrongDate== true">
+                            <div>
+                                <strong>Please insert a valid Date</strong>
+                            </div>
+                        </template>
+                        <template x-if="cantNext == true">
+                            <div>
+                                <strong>Please fill out the form</strong>
+                            </div>
+                        </template>
+                    </div>
+                    <div x-show="participants" x-transition>
+                        <!-- Horse data -->
+                        <form>
+                            <label for="hname">Horse's name:</label><br>
+                            <input type="text" id="hname" x-model="horseName"><br>
+                            <label for="color">Color:</label><br>
+                            <input type="text" id="color" x-model="horseColor">
+                            <div class="block mx-auto ">
+                                <button type="button"
+                                    class="bg-purple-400 hover:bg-purple-500 active:bg-purple-600 p-2 m-1 rounded-full border-2 border-blue-400"
+                                    @click='addHorse()'>
+                                    Add Horse
+                                </button>
+                            </div>
+                            <template x-if="colorExists == true">
+                                <div>
+                                    <strong>This color is already taken</strong>
+                                </div>
+                            </template>
+                            <template x-if="noHorse == true">
+                                <div>
+                                    <strong>Please fill out the form</strong>
+                                </div>
+                            </template>
+                        </form>
+
+                        <!--  Hobuste Tabel -->
+                        <div class="p-2 bg-white border-2 border-gray-400 flex">
+                            <table class="w-full">
+                                <thead class="w-1/2 text-left">
+                                    <tr>
+                                        <th>Horse's name</th>
+                                        <th>Color</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="(horse, index) in horses">
+                                        <tr>
+                                            <td x-text="horse.horseName"></td>
+                                            <td x-text="horse.horseColor"></td>
+                                            <td>
+                                                <button type="button" @click="removeHorse(index)"
+                                                    class="bg-purple-400 hover:bg-purple-500 p-2 rounded-full border-2 border-blue-400">
+                                                    X
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <button class="bg-purple-400 hover:bg-purple-500 p-2 m-1 rounded-full border-2 border-blue-400"
+                            @click="createRace()">
+                            Submit
+                        </button>
+                        <template x-if="cantSubmit == true">
+                            <div>
+                                <strong>You need at least 2 horses to have a proper race</strong>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+            <div class="pl-4">
+
+                <ul class="list-none">
+                    <template x-for="(race, index) in races">
+                        <li class="bg-purple-400 hover:bg-purple-500 rounded-full active:bg-purple-600 border-2 border-blue-400"
+                            x-text="race.raceName" @click="raceDetails = index; makeBet = false; checked = false; betMade= true"></li>
+                    </template>
+                </ul>
+            </div>
+
+
+        </div>
+
+        <!--Details -->
+        <div class="grid grid-cols-2 bg-green-300 p-4">
+            <template x-if="raceDetails!==false">
+                <div>
+                    <div>
+
+                        <strong>Name: <span x-text="races[raceDetails].raceName"></span></strong>
+                        <br>
+                        <strong>Location: <span x-text="races[raceDetails].location"></span></strong>
+                        <br>
+                        <strong>Date: <span x-text="races[raceDetails].raceDate"></span></strong>
+                        <br>
+
+                    </div>
+                    <strong>Competitors</strong>
+                    <!-- horse list -->
+
+                    <div class="p-2 bg-white border-2 border-gray-400 flex items-stretch">
+
+                        <table class="w-full">
+                            <thead class="w-1/2 text-left">
+                                <tr>
+                                    <th>Horse's name</th>
+                                    <th>Color</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-justify">
+                                <template x-for="(horse, index) in races[raceDetails].horses">
+                                    <tr>
+                                        <td x-text="horse.horseName"></td>
+                                        <td x-text="horse.horseColor"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <br><br>
+
+                    <template x-if="races[raceDetails].result" x-transition>
+                        <div>
+                            <strong>Results</strong>
+                            <div class="p-2 bg-white border-2 border-gray-400 flex items-stretch">
+                                <table class="w-full">
+                                    <thead class="w-1/2 text-left">
+                                        <tr>
+                                            <th></th>
+                                            <th>Horse's name</th>
+                                            <th>Color</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-justify">
+                                        <template x-for="(horse, index) in races[raceDetails].result">
+                                            <tr>
+                                                <td x-text="(index + 1)+koht"></td>
+                                                <td x-text="horse.horseName"></td>
+                                                <td x-text="horse.horseColor"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <strong x-show="races[raceDetails].betWin">
+                                You placed your bet on <span x-text="races[raceDetails].checked"></span><br>
+                                The winner is <span x-text="races[raceDetails].result[0].horseName"></span><br>                                
+                                You won your bet <br>
+                                Gongratulations!
+                            </strong>
+                            <strong x-show="!races[raceDetails].betWin">
+                                You placed your bet on <span x-text="races[raceDetails].checked"></span><br>
+                                The winner is <span x-text="races[raceDetails].result[0].horseName"></span><br>
+                                You lost your bet. <br>
+                                Better luck next time
+                            </strong>
+                        </div>
+                    </template>
+
+                </div>
+            </template>
+
+            <!-- bet & start -->
+
+            <template x-if="raceDetails !== false">
+                <template x-if="!races[raceDetails].result">
+                    <div class="pl-4">
+
+                        <button
+                            class="bg-purple-400 hover:bg-purple-500 active:bg-purple-600 p-2 m-1 rounded-full border-2 border-blue-400"
+                            @click="makeBet = true">
+                            Make a bet
+                        </button>
+
+                        <ul class="list-none" x-show="makeBet">
+                            <template x-for="(horse, index) in races[raceDetails].horses">
+                                <li class="bg-purple-400 hover:bg-purple-500 rounded-full active:bg-purple-600 border-2 border-blue-400"
+                                    @click="checked = index">
+                                    <span x-text="horse.horseName"></span>
+                                    <span x-show="checked===index">&#10004;</span>
+                                </li>
+                            </template>
+                            <button
+                                class="bg-purple-400 hover:bg-purple-500 active:bg-purple-600 p-2 m-1 rounded-full border-2 border-blue-400"
+                                @click="startRace">
+                                Start race
+                            </button>
+                        </ul>
+                        <template x-if="betMade == false">
+                            <div>
+                                <strong>Please make a bet first</strong>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </div>
+
+    <script>
+
+        function race() {
+            return {
+                wrongDate: false,
+                colorExists: false,
+                noHorse: false,
+                cantSubmit: false,
+                cantNext: false,
+                betMade: true,
+                koht: '. place',
+                checked: false,
+                makeBet: false,
+                raceDetails: false,
+                create: false,
+                participants: false,
+                horses: [],
+                raceName: '',
+                location: '',
+                horseName: '',
+                horseColor: '',
+                raceDate: null,
+                races: [],
+
+                //functions
+                createRace: function () {
+                    if (this.horses.length <= 1) {
+                        this.cantSubmit = true;
+                    } else {
+                        this.races.push({ raceName: this.raceName, location: this.location, raceDate: this.raceDate, horses: this.horses });
+                        this.create = false;
+                        this.horses = [];
+                        this.raceName = '';
+                        this.location = '';
+                        this.horseName = '';
+                        this.horseColor = '';
+                        this.raceDate = null;
+                        this.cantSubmit = false;
+                        this.participants = false;
+                    }
+                },
+
+                validateRace: function () {
+                    if (this.location.trim() && this.raceName.trim() && this.raceDate) {
+                        if (Date.now() >= Date.parse(this.raceDate)){
+                            this.wrongDate = true;
+                            this.cantNext = false;
+                        } else {
+                            this.participants = true;
+                            this.cantNext = false;
+                            this.wrongDate = false;
+                        }
+                    } else {
+                        this.cantNext = true;
+                    }
+                },
+
+                addHorse: function () {
+                    if (this.horseName.trim() && this.horseColor.trim()){
+                        this.horseColor = this.horseColor.charAt(0).toUpperCase() + this.horseColor.slice(1).toLowerCase();
+
+                        if(this.horses.find(h => h.horseColor==this.horseColor)){
+                            this.horseName = '';
+                            this.horseColor = '';
+                            this.colorExists= true;
+                        } else {
+                            this.horses.push({ horseName: this.horseName, horseColor: this.horseColor });
+                            this.horseName = '';
+                            this.horseColor = '';
+                            this.colorExists = false;
+                            this.noHorse = false;
+                        }                        
+                    } else {
+                        this.noHorse = true;
+                    }
+                },
+
+                removeHorse: function (index) {
+                    this.horses.splice(this.index, 1);
+                },
+
+                startRace: function () {
+                    if (this.checked === false) {
+                        return this.betMade = false;
+                    }
+                    this.races[this.raceDetails].checked = this.races[this.raceDetails].horses[this.checked].horseName
+                    this.races[this.raceDetails].result = this.races[this.raceDetails].horses
+                        .map(value => ({ value, sort: Math.random() }))
+                        .sort((a, b) => a.sort - b.sort)
+                        .map(({ value }) => value)
+                    if (this.races[this.raceDetails].result[0].horseName == this.races[this.raceDetails].horses[this.checked].horseName) {
+                        this.races[this.raceDetails].betWin = true;
+                    } else {
+                        this.races[this.raceDetails].betWin = false;
+                    }
+
+                    this.checked = false;
+
+                }
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>
